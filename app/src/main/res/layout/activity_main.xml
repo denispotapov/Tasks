@@ -11,14 +11,14 @@
 
         <TextView
             android:id="@+id/textView"
-            android:layout_marginLeft="7dp"
-            android:textSize="15sp"
-            android:textColor="@android:color/black"
-            android:textAllCaps="false"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="7dp"
             android:layout_weight="1"
-            android:text="Задачи на день" />
+            android:text="Задачи на день"
+            android:textAllCaps="false"
+            android:textColor="@android:color/black"
+            android:textSize="15sp" />
 
         <Button
             android:id="@+id/btnWeek"
@@ -32,9 +32,9 @@
             android:id="@+id/btnClear"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAllCaps="false"
             android:layout_weight="1"
-            android:text="Очистить" />
+            android:text="Очистить"
+            android:textAllCaps="false" />
 
     </LinearLayout>
 
@@ -77,23 +77,23 @@
     </LinearLayout>
 
     <LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal">
+
+    <EditText
+        android:id="@+id/editText3"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:layout_weight="1"
+        android:ems="10"
+        android:inputType="textPersonName" />
 
-        <EditText
-            android:id="@+id/editText3"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:ems="10"
-            android:inputType="textPersonName" />
-
-        <CheckBox
-            android:id="@+id/checkBox3"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-    </LinearLayout>
+    <CheckBox
+        android:id="@+id/checkBox3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+</LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"

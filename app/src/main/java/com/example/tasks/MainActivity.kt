@@ -3,6 +3,7 @@ package com.example.tasks
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
+import android.database.sqlite.SQLiteDatabase
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
@@ -10,19 +11,28 @@ import kotlinx.android.synthetic.main.activity_main.*
 class MainActivity : AppCompatActivity() {
 
     private val dbHelper = DbHelperWeekdays(this)
-
+    private lateinit var database: SQLiteDatabase
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        database = dbHelper.writableDatabase
 
-        val database = dbHelper.writableDatabase
+        initEditTexts()
+        initCheckBoxes()
+        setButtonClearListener()
+
+        btnWeek.setOnClickListener {
+            startActivity(Intent(this, WeekendsActivity::class.java))
+        }
+    }
+
+    private fun initEditTexts() {
         val cursor = database.query(
             TABLE_TASKS, null, null,
             null, null, null, null
         )
         if (cursor.moveToFirst()) {
-
             editText.setText(cursor.getString(cursor.getColumnIndex(KEY_TASK1)))
             editText2.setText(cursor.getString(cursor.getColumnIndex(KEY_TASK2)))
             editText3.setText(cursor.getString(cursor.getColumnIndex(KEY_TASK3)))
@@ -36,12 +46,26 @@ class MainActivity : AppCompatActivity() {
             editText11.setText(cursor.getString(cursor.getColumnIndex(KEY_TASK11)))
         }
         cursor.close()
+    }
 
+    private fun initCheckBoxes() {
+        checkBox.isChecked = loadCheck("check")
+        checkBox2.isChecked = loadCheck("check2")
+        checkBox3.isChecked = loadCheck("check3")
+        checkBox4.isChecked = loadCheck("check4")
+        checkBox5.isChecked = loadCheck("check5")
+        checkBox6.isChecked = loadCheck("check6")
+        checkBox7.isChecked = loadCheck("check7")
+        checkBox8.isChecked = loadCheck("check8")
+        checkBox9.isChecked = loadCheck("check9")
+        checkBox10.isChecked = loadCheck("check10")
+        checkBox11.isChecked = loadCheck("check11")
+    }
 
-        btnWeek.setOnClickListener {
-            val intent = Intent(this, Weekends::class.java)
-            startActivity(intent)
-        }
+    private fun loadCheck(key: String): Boolean =
+        getPreferences(Context.MODE_PRIVATE).getBoolean(key, false)
+
+    private fun setButtonClearListener() {
         btnClear.setOnClickListener {
             database.delete(TABLE_TASKS, null, null)
             editText.setText("")
@@ -68,58 +92,36 @@ class MainActivity : AppCompatActivity() {
             checkBox10.isChecked = false
             checkBox11.isChecked = false
         }
-
-        checkBox.isChecked = loadCheck("check")
-        checkBox2.isChecked = loadCheck("check2")
-        checkBox3.isChecked = loadCheck("check3")
-        checkBox4.isChecked = loadCheck("check4")
-        checkBox5.isChecked = loadCheck("check5")
-        checkBox6.isChecked = loadCheck("check6")
-        checkBox7.isChecked = loadCheck("check7")
-        checkBox8.isChecked = loadCheck("check8")
-        checkBox9.isChecked = loadCheck("check9")
-        checkBox10.isChecked = loadCheck("check10")
-        checkBox11.isChecked = loadCheck("check11")
-    }
-
-    override fun onBackPressed() {
-        val intent = Intent()
-        intent.action = Intent.ACTION_MAIN
-        intent.addCategory(Intent.CATEGORY_HOME)
-        startActivity(intent)
     }
 
     override fun onPause() {
-        val database = dbHelper.writableDatabase
-        val contentValues = ContentValues()
+        saveDataToDatabase()
+        saveDataToSharedPrefs()
+        super.onPause()
+    }
 
-        val task1 = editText.text.toString()
-        val task2 = editText2.text.toString()
-        val task3 = editText3.text.toString()
-        val task4 = editText4.text.toString()
-        val task5 = editText5.text.toString()
-        val task6 = editText6.text.toString()
-        val task7 = editText7.text.toString()
-        val task8 = editText8.text.toString()
-        val task9 = editText9.text.toString()
-        val task10 = editText10.text.toString()
-        val task11 = editText11.text.toString()
+    private fun saveDataToDatabase() {
+        val contentValues = ContentValues().apply {
+            put(KEY_TASK1, editText.text.toString())
+            put(KEY_TASK2, editText2.text.toString())
+            put(KEY_TASK3, editText3.text.toString())
+            put(KEY_TASK4, editText4.text.toString())
+            put(KEY_TASK5, editText5.text.toString())
+            put(KEY_TASK6, editText6.text.toString())
+            put(KEY_TASK7, editText7.text.toString())
+            put(KEY_TASK8, editText8.text.toString())
+            put(KEY_TASK9, editText9.text.toString())
+            put(KEY_TASK10, editText10.text.toString())
+            put(KEY_TASK11, editText11.text.toString())
+        }
 
-        contentValues.put(KEY_TASK1, task1)
-        contentValues.put(KEY_TASK2, task2)
-        contentValues.put(KEY_TASK3, task3)
-        contentValues.put(KEY_TASK4, task4)
-        contentValues.put(KEY_TASK5, task5)
-        contentValues.put(KEY_TASK6, task6)
-        contentValues.put(KEY_TASK7, task7)
-        contentValues.put(KEY_TASK8, task8)
-        contentValues.put(KEY_TASK9, task9)
-        contentValues.put(KEY_TASK10, task10)
-        contentValues.put(KEY_TASK11, task11)
+        database.apply {
+            insert(TABLE_TASKS, null, contentValues)
+            update(TABLE_TASKS, contentValues, null, null)
+        }
+    }
 
-        database.insert(TABLE_TASKS, null, contentValues)
-        database.update(TABLE_TASKS, contentValues, null, null)
-
+    private fun saveDataToSharedPrefs() {
         saveCheck(checkBox.isChecked, "check")
         saveCheck(checkBox2.isChecked, "check2")
         saveCheck(checkBox3.isChecked, "check3")
@@ -131,18 +133,20 @@ class MainActivity : AppCompatActivity() {
         saveCheck(checkBox9.isChecked, "check9")
         saveCheck(checkBox10.isChecked, "check10")
         saveCheck(checkBox11.isChecked, "check11")
-        super.onPause()
     }
 
     private fun saveCheck(isChecked: Boolean, key: String) {
-        val sharedPref = getPreferences(Context.MODE_PRIVATE)
-        val editor = sharedPref.edit()
-        editor.putBoolean(key, isChecked)
-        editor.apply()
+        getPreferences(Context.MODE_PRIVATE).edit().apply {
+            putBoolean(key, isChecked)
+            apply()
+        }
     }
 
-    private fun loadCheck(key: String):Boolean{
-        val sharedPref = getPreferences(Context.MODE_PRIVATE)
-        return sharedPref.getBoolean(key, false)
+    override fun onBackPressed() {
+        val intent = Intent().apply {
+            action = Intent.ACTION_MAIN
+            addCategory(Intent.CATEGORY_HOME)
+        }
+        startActivity(intent)
     }
 }
